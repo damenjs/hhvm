@@ -1094,6 +1094,9 @@ class Redis {
    * "*2\r\n$3\r\nGET\r\n$7\r\nsomekey\r\n"
    */
   protected function processArrayCommand($cmd, array $args) {
+    if(empty($args)){
+      return false;
+    }
     if ($this->mode == self::PIPELINE) {
       $this->commands[] = [ 'cmd' => $cmd, 'args' => $args ];
       return true;
@@ -1496,7 +1499,9 @@ class Redis {
 
     if ($format == '...') {
       $args = $this->translateVarArgs($args, $func['vararg']);
-      $this->processArrayCommand($func['cmd'], $args);
+      if(!$this->processArrayCommand($func['cmd'], $args)){
+        return false;
+      }
       if (empty($func['handler'])) {
         return null;
       }
@@ -1544,7 +1549,9 @@ class Redis {
       $args[1] = $args[2];
       $args[2] = $tmp;
     }
-    $this->processArrayCommand($func['cmd'], $args);
+    if(!$this->processArrayCommand($func['cmd'], $args)){
+      return false;
+    }
     if (empty($func['handler'])) {
       return null;
     }
